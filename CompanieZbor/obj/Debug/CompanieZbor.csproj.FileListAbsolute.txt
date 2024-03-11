@@ -1,0 +1,7 @@
+C:\Users\Andrea\RiderProjects\mpp-proiect-csharp-andrea17tc\CompanieZbor\bin\Debug\CompanieZbor.exe
+C:\Users\Andrea\RiderProjects\mpp-proiect-csharp-andrea17tc\CompanieZbor\bin\Debug\CompanieZbor.pdb
+C:\Users\Andrea\RiderProjects\mpp-proiect-csharp-andrea17tc\CompanieZbor\obj\Debug\CompanieZbor.csproj.AssemblyReference.cache
+C:\Users\Andrea\RiderProjects\mpp-proiect-csharp-andrea17tc\CompanieZbor\obj\Debug\CompanieZbor.csproj.SuggestedBindingRedirects.cache
+C:\Users\Andrea\RiderProjects\mpp-proiect-csharp-andrea17tc\CompanieZbor\obj\Debug\CompanieZbor.csproj.CoreCompileInputs.cache
+C:\Users\Andrea\RiderProjects\mpp-proiect-csharp-andrea17tc\CompanieZbor\obj\Debug\CompanieZbor.exe
+C:\Users\Andrea\RiderProjects\mpp-proiect-csharp-andrea17tc\CompanieZbor\obj\Debug\CompanieZbor.pdb
