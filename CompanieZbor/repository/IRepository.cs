@@ -1,6 +1,6 @@
 ﻿namespace CompanieZbor.repository;
 
-public interface Repository<ID, E : Entity<int>>
+public interface IRepository<ID, E : Entity<int>>
 {
     E? findOne(ID id);
     
