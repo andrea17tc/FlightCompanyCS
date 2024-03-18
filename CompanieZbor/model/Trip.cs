@@ -1,26 +1,26 @@
-﻿namespace CompanieZboruri.model;
+﻿namespace CompanieZbor.model;
 
-public class Trip
+public class Trip : Entity<int>
 {
-    private int touristID;
-    private int purchaseID;
+    private Tourist tourist;
+    private Purchase purchase;
 
-    public Trip(int flightId, int purchaseId)
+    public Trip(Tourist tourist, Purchase purchase)
     {
-        this.touristID = touristID;
-        this.purchaseID = purchaseId;
+        this.tourist = tourist;
+        this.purchase = purchase;
     }
 
-    public int TouristId
+    public Tourist Tourist
     {
-        get { return touristID; }
-        set { touristID = value; }
+        get { return tourist; }
+        set { tourist = value; }
     }
 
-    public int PurchaseID
+    public Purchase Purchase
     {
-        get { return purchaseID; }
-        set { purchaseID = value; }
+        get { return purchase; }
+        set { purchase = value; }
     }
     
     public override bool Equals(object obj)
@@ -31,12 +31,12 @@ public class Trip
         }
 
         Trip other = (Trip)obj;
-        return touristID == other.touristID &&
-               purchaseID == other.purchaseID;
+        return tourist == other.tourist &&
+               purchase == other.purchase;
     }
 
     public override string ToString()
     {
-        return touristID.ToString() + purchaseID.ToString() + '\n';
+        return tourist.ToString() + purchase.ToString() + '\n';
     }
 }

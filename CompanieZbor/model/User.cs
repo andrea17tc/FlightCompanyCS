@@ -1,23 +1,15 @@
-﻿namespace CompanieZboruri.model;
+﻿namespace CompanieZbor.model;
 
-public class User
+public class User : Entity<int>
 {
-    private int userID;
     private string username;
     private string password;
 
 
-    public User(int userId, string username, string password)
+    public User(string username, string password)
     {
-        this.userID = userId;
         this.username = username;
         this.password = password;
-    }
-
-    public int UserID
-    {
-        get { return userID; }
-        set { userID = value; }
     }
 
     public string Username
@@ -33,13 +25,12 @@ public class User
         }
 
         User other = (User)obj;
-        return userID == other.userID &&
-               username == other.username &&
+        return username == other.username &&
                password == other.password;
     }
 
     public override string ToString()
     {
-        return userID.ToString() + username + password + '\n';
+        return username + password + '\n';
     }
 }

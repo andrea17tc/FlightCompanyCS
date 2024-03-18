@@ -1,51 +1,42 @@
-﻿namespace CompanieZboruri.model;
+﻿namespace CompanieZbor.model;
 
-public class Purchase
+public class Purchase : Entity<int>
 {
-    private int purchaseID;
+    private Flight flight;
 
-    private int flightID;
+    private User user;
 
-    private int userID;
-
-    private string clientName;
+    private Tourist tourist;
     
     private string clientAddress;
 
-    private int noSeats;
+    private int noBookedSeats;
 
-    public Purchase(int purchaseId, int flightId, int userId, string clientName, string clientAddress, int noSeats)
+    public Purchase(Flight flight, User user, Tourist tourist, string clientAddress, int noBookedSeats)
     {
-        this.purchaseID = purchaseId;
-        this.flightID = flightId;
-        this.userID = userId;
-        this.clientName = clientName;
+        this.flight = flight;
+        this.user = user;
+        this.tourist = tourist;
         this.clientAddress = clientAddress;
-        this.noSeats = noSeats;
+        this.noBookedSeats = noBookedSeats;
     }
 
-    public int PurchaseId
+    public Flight Flight
     {
-        get { return purchaseID; }
-        set { purchaseID = value; }
+        get { return flight; }
+        set { flight = value; }
     }
 
-    public int FlightId
+    public User User
     {
-        get { return flightID; }
-        set { flightID = value; }
-    }
-
-    public int UserId
-    {
-        get { return userID; }
-        set { userID = value; }
+        get { return user; }
+        set { user = value; }
     }
     
-    public string ClientName
+    public Tourist Tourist
     {
-        get { return clientName; }
-        set { clientName = value; }
+        get { return tourist; }
+        set { tourist = value; }
     }
     
     public string ClientAddress
@@ -54,10 +45,10 @@ public class Purchase
         set { clientAddress = value; }
     }
     
-    public int NoSeats
+    public int NoBookedSeats
     {
-        get { return noSeats; }
-        set { noSeats = value; }
+        get { return noBookedSeats; }
+        set { noBookedSeats = value; }
     }
     
 
@@ -69,16 +60,15 @@ public class Purchase
         }
 
         Purchase other = (Purchase)obj;
-        return purchaseID == other.purchaseID &&
-               flightID == other.flightID &&
-               userID == other.userID &&
-               clientName == other.clientName &&
+        return flight == other.flight &&
+               user == other.user &&
+               tourist == other.tourist &&
                clientAddress == other.clientAddress &&
-               noSeats == other.noSeats;
+               noBookedSeats == other.noBookedSeats;
     }
 
     public override string ToString()
     {
-        return purchaseID.ToString() + flightID.ToString() + userID.ToString() + clientName + clientAddress+ noSeats.ToString() + '\n';
+        return flight.ToString() + user.ToString() + tourist.ToString() + clientAddress+ noBookedSeats.ToString() + '\n';
     }
 }

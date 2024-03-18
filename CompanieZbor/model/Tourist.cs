@@ -1,20 +1,11 @@
-﻿namespace CompanieZboruri.model;
+﻿namespace CompanieZbor.model;
 
-public class Tourist
+public class Tourist : Entity<int>
 {
-    private int touristID;
-
     private string touristName;
     
-    public Tourist(int touristID, String touristName) {
-        this.touristID = touristID;
+    public Tourist(String touristName) {
         this.touristName = touristName;
-    }
-
-    public int TouristID
-    {
-        get { return touristID; }
-        set { touristID = value; }
     }
 
     public string TouristName
@@ -31,12 +22,11 @@ public class Tourist
         }
 
         Tourist other = (Tourist)obj;
-        return touristID == other.touristID &&
-               touristName == other.touristName;
+        return touristName == other.touristName;
     }
 
     public override string ToString()
     {
-        return touristID.ToString() + touristName+ '\n';
+        return touristName+ '\n';
     }
 }

@@ -1,6 +1,6 @@
-﻿namespace CompanieZboruri.repository;
+﻿namespace CompanieZbor.repository;
 
-public interface Repository<ID, E>
+public interface Repository<ID, E : Entity<int>>
 {
     E? findOne(ID id);
     
@@ -8,7 +8,7 @@ public interface Repository<ID, E>
     
     E? save(E entity);
     
-    E? delete(E entity);
+    E? delete(ID id);
     
     E? update(E entity);
     
