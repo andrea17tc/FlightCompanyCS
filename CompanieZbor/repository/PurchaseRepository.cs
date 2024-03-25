@@ -10,14 +10,20 @@ namespace Ro.Mpp2024.Repository
         private readonly FlightRepository flightRepository;
         private readonly UserRepository userRepository;
         private readonly TouristRepository touristRepository;
-        private readonly JdbcUtils dbUtils;
-        private static readonly NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+        private static readonly ILog log = LogManager.GetLogger("Purchase Repository");
+        IDictionary<String, string> props;
 
-        public PurchaseRepository(SqlConnectionStringBuilder props, FlightRepository flightRepository, UserRepository userRepository,
+        public UserRepository(IDictionary<String, string> props)
+        {
+            log.Info("Creating UserRepository ");
+            this.props = props;
+        }
+
+        public PurchaseRepository(IDictionary<String, string> props, FlightRepository flightRepository, UserRepository userRepository,
                               TouristRepository touristRepository)
         {
-            logger.Info("Initializing PurchaseRepository with properties: {0}", props.ConnectionString);
-            dbUtils = new JdbcUtils(props);
+            log.Info("Creating PurchaseRepository ");
+            this.props = props;
             this.flightRepository = flightRepository;
             this.userRepository = userRepository;
             this.touristRepository = touristRepository;

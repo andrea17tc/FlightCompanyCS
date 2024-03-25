@@ -9,16 +9,17 @@ namespace Ro.Mpp2024.Repository
     {
         private readonly TouristRepository touristRepository;
         private readonly PurchaseRepository purchaseRepository;
-        private readonly JdbcUtils dbUtils;
-        private static readonly NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+        private static readonly ILog log = LogManager.GetLogger("Trip Repository");
+        IDictionary<String, string> props;
 
-        public TripRepository(SqlConnectionStringBuilder props, TouristRepository touristRepository, PurchaseRepository purchaseRepository)
+        public TripRepository(IDictionary<String, string> props, TouristRepository touristRepository, PurchaseRepository purchaseRepository)
         {
-            logger.Info("Initializing TripRepository with properties: {0}", props.ConnectionString);
-            dbUtils = new JdbcUtils(props);
+            log.Info("Creating UserRepository ");
+            this.props = props;
             this.touristRepository = touristRepository;
             this.purchaseRepository = purchaseRepository;
         }
+
 
         public Optional<Trip> FindOne(int id)
         {

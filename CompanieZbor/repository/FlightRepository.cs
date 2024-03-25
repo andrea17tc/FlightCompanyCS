@@ -1,25 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
+using System.Data;
 using Ro.Mpp2024.Model;
 
 namespace Ro.Mpp2024.Repository
 {
     public class FlightRepository : IRepository<int, Flight>
     {
-        private readonly JdbcUtils dbUtils;
-        private static readonly NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+        private static readonly ILog log = LogManager.GetLogger("Flight Repository");
 
-        public FlightRepository(SqlConnectionStringBuilder props)
+        IDictionary<String, string> props;
+
+        public FlightRepository(IDictionary<String, string> props)
         {
-            logger.Info("Initializing FlightRepository with properties: {0}", props.ConnectionString);
-            dbUtils = new JdbcUtils(props);
+            log.Info("Creating FlightRepository ");
+            this.props = props;
         }
 
-        public Optional<Flight> FindOne(int id)
+        public Flight? findOne(int id)
         {
-            logger.Trace("Finding Flight by ID: {0}", id);
-            using (SqlConnection connection = dbUtils.GetConnection())
+            log.InfoFormat("Finding Flight by ID: {0}", id);
+            IDbConnection con = DBUtils.getConnection(props);
+
+            using (var connection = con.CreateConnection())
             {
                 string query = "SELECT * FROM flight WHERE id=@id;";
                 using (SqlCommand command = new SqlCommand(query, connection))
@@ -42,13 +45,13 @@ namespace Ro.Mpp2024.Repository
                     }
                 }
             }
-            logger.Trace("Flight not found with ID: {0}", id);
+            log.Trace("Flight not found with ID: {0}", id);
             return Optional.Empty<Flight>();
         }
 
         public IEnumerable<Flight> FindAll()
         {
-            logger.Trace("Finding all Flights");
+            log.Trace("Finding all Flights");
             List<Flight> flights = new List<Flight>();
             using (SqlConnection connection = dbUtils.GetConnection())
             {
@@ -72,13 +75,13 @@ namespace Ro.Mpp2024.Repository
                     }
                 }
             }
-            logger.Trace("Found {0} Flights", flights.Count);
+            log.Trace("Found {0} Flights", flights.Count);
             return flights;
         }
 
         public Optional<Flight> Save(Flight entity)
         {
-            logger.Trace("Saving Flight: {0}", entity);
+            log.Trace("Saving Flight: {0}", entity);
             using (SqlConnection connection = dbUtils.GetConnection())
             {
                 string query = "INSERT INTO flight (destination, date, airport, noTotalSeats) VALUES (@destination, @date, @airport, @noTotalSeats);";
@@ -90,7 +93,7 @@ namespace Ro.Mpp2024.Repository
                     command.Parameters.AddWithValue("@noTotalSeats", entity.NoTotalSeats);
                     connection.Open();
                     int rowsAffected = command.ExecuteNonQuery();
-                    logger.Trace("Saved {0} instances", rowsAffected);
+                    log.Trace("Saved {0} instances", rowsAffected);
                 }
             }
             return Optional.Empty<Flight>();
@@ -98,7 +101,7 @@ namespace Ro.Mpp2024.Repository
 
         public Optional<Flight> Delete(int id)
         {
-            logger.Trace("Deleting Flight with ID: {0}", id);
+            log.Trace("Deleting Flight with ID: {0}", id);
             using (SqlConnection connection = dbUtils.GetConnection())
             {
                 string query = "DELETE FROM flight WHERE id=@id;";
@@ -107,7 +110,7 @@ namespace Ro.Mpp2024.Repository
                     command.Parameters.AddWithValue("@id", id);
                     connection.Open();
                     int rowsAffected = command.ExecuteNonQuery();
-                    logger.Trace("Deleted {0} instances", rowsAffected);
+                    log.Trace("Deleted {0} instances", rowsAffected);
                 }
             }
             return Optional.Empty<Flight>();
@@ -115,7 +118,7 @@ namespace Ro.Mpp2024.Repository
 
         public Optional<Flight> Update(int id, Flight entity)
         {
-            logger.Trace("Updating Flight with ID: {0}", id);
+            log.Trace("Updating Flight with ID: {0}", id);
             using (SqlConnection connection = dbUtils.GetConnection())
             {
                 string query = "UPDATE flight SET date=@date, airport=@airport WHERE id=@id;";
@@ -126,7 +129,7 @@ namespace Ro.Mpp2024.Repository
                     command.Parameters.AddWithValue("@id", id);
                     connection.Open();
                     int rowsAffected = command.ExecuteNonQuery();
-                    logger.Trace("Updated {0} instances", rowsAffected);
+                    log.Trace("Updated {0} instances", rowsAffected);
                 }
             }
             return Optional.Empty<Flight>();

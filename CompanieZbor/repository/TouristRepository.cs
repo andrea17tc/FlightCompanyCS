@@ -7,14 +7,16 @@ namespace Ro.Mpp2024.Repository
 {
     public class TouristRepository : IRepository<int, Tourist>
     {
-        private readonly JdbcUtils dbUtils;
-        private static readonly NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+        private static readonly ILog log = LogManager.GetLogger("Tourist Repository");
+        
+        IDictionary<String, string> props;
 
-        public TouristRepository(SqlConnectionStringBuilder props)
+        public TouristRepository(IDictionary<String, string> props)
         {
-            logger.Info("Initializing TouristRepository with properties: {0}", props.ConnectionString);
-            dbUtils = new JdbcUtils(props);
+            log.Info("Creating TouristRepository ");
+            this.props = props;
         }
+
 
         public Optional<Tourist> FindOne(int id)
         {

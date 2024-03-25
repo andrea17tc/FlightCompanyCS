@@ -5,3 +5,14 @@ C:\Users\Andrea\RiderProjects\mpp-proiect-csharp-andrea17tc\CompanieZbor\obj\Deb
 C:\Users\Andrea\RiderProjects\mpp-proiect-csharp-andrea17tc\CompanieZbor\obj\Debug\CompanieZbor.csproj.CoreCompileInputs.cache
 C:\Users\Andrea\RiderProjects\mpp-proiect-csharp-andrea17tc\CompanieZbor\obj\Debug\CompanieZbor.exe
 C:\Users\Andrea\RiderProjects\mpp-proiect-csharp-andrea17tc\CompanieZbor\obj\Debug\CompanieZbor.pdb
+C:\Users\Andrea\source\repos\MPP\mpp-proiect-csharp-andrea17tc\CompanieZbor\bin\Debug\CompanieZbor.exe
+C:\Users\Andrea\source\repos\MPP\mpp-proiect-csharp-andrea17tc\CompanieZbor\bin\Debug\CompanieZbor.pdb
+C:\Users\Andrea\source\repos\MPP\mpp-proiect-csharp-andrea17tc\CompanieZbor\obj\Debug\CompanieZbor.csproj.AssemblyReference.cache
+C:\Users\Andrea\source\repos\MPP\mpp-proiect-csharp-andrea17tc\CompanieZbor\obj\Debug\CompanieZbor.csproj.SuggestedBindingRedirects.cache
+C:\Users\Andrea\source\repos\MPP\mpp-proiect-csharp-andrea17tc\CompanieZbor\obj\Debug\CompanieZbor.csproj.CoreCompileInputs.cache
+C:\Users\Andrea\source\repos\MPP\mpp-proiect-csharp-andrea17tc\CompanieZbor\obj\Debug\CompanieZbor.exe
+C:\Users\Andrea\source\repos\MPP\mpp-proiect-csharp-andrea17tc\CompanieZbor\obj\Debug\CompanieZbor.pdb
+C:\Users\Andrea\source\repos\MPP\mpp-proiect-csharp-andrea17tc\CompanieZbor\bin\Debug\log4net.dll
+C:\Users\Andrea\source\repos\MPP\mpp-proiect-csharp-andrea17tc\CompanieZbor\bin\Debug\Mono.Data.Sqlite.dll
+C:\Users\Andrea\source\repos\MPP\mpp-proiect-csharp-andrea17tc\CompanieZbor\bin\Debug\log4net.xml
+C:\Users\Andrea\source\repos\MPP\mpp-proiect-csharp-andrea17tc\CompanieZbor\obj\Debug\CompanieZbor.csproj.CopyComplete

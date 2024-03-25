@@ -7,13 +7,14 @@ namespace Ro.Mpp2024.Repository
 {
     public class UserRepository : IRepository<int, User>
     {
-        private readonly JdbcUtils dbUtils;
-        private static readonly NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
+        private static readonly ILog log = LogManager.GetLogger("User Repository");
 
-        public UserRepository(SqlConnectionStringBuilder props)
+        IDictionary<String, string> props;
+
+        public UserRepository(IDictionary<String, string> props)
         {
-            logger.Info("Initializing UserRepository with properties: {0}", props.ConnectionString);
-            dbUtils = new JdbcUtils(props);
+            log.Info("Creating UserRepository ");
+            this.props = props;
         }
 
         public Optional<User> FindOne(int id)
