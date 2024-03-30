@@ -1,130 +1,135 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
-using Ro.Mpp2024.Model;
+using CompanieZbor.model;
+using CompanieZbor.utils;
+using log4net;
 
-namespace Ro.Mpp2024.Repository
+namespace CompanieZbor.repository;
+
+public class UserRepository : IRepository<int, User>
 {
-    public class UserRepository : IRepository<int, User>
+    private static readonly ILog log = LogManager.GetLogger("User Repository");
+    IDictionary<String, string> props;
+
+    public UserRepository(IDictionary<String, string> props)
     {
-        private static readonly ILog log = LogManager.GetLogger("User Repository");
+        log.Info("Creating UserRepository ");
+        this.props = props;
+    }
 
-        IDictionary<String, string> props;
+    public User? findOne(int id)
+    {
+        log.InfoFormat("Finding User by ID: {0}", id);
+        IDbConnection con = DBUtils.getConnection(props);
 
-        public UserRepository(IDictionary<String, string> props)
+        using (var comm = con.CreateCommand())
         {
-            log.Info("Creating UserRepository ");
-            this.props = props;
-        }
+            comm.CommandText = "SELECT * FROM user WHERE id=@id; ";
+            IDbDataParameter paramId = comm.CreateParameter();
+            paramId.ParameterName = "@id";
+            paramId.Value = id;
+            comm.Parameters.Add(paramId);
 
-        public Optional<User> FindOne(int id)
-        {
-            logger.Trace("Finding User by ID: {0}", id);
-            using (SqlConnection connection = dbUtils.GetConnection())
+            using (var dataR = comm.ExecuteReader())
             {
-                string query = "SELECT * FROM user WHERE id=@id;";
-                using (SqlCommand command = new SqlCommand(query, connection))
+                if (dataR.Read())
                 {
-                    command.Parameters.AddWithValue("@id", id);
-                    connection.Open();
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            int userId = reader.GetInt32("id");
-                            string username = reader.GetString("username");
-                            string password = reader.GetString("password");
-                            User user = new User(username, password);
-                            user.Id = userId;
-                            logger.Trace("Found User: {0}", user);
-                            return Optional.Of(user);
-                        }
-                    }
+                    string username = dataR.GetString(1);
+                    string password = dataR.GetString(2);
+                    User u = new User(username, password);
+                    u.Id = id;
+                    log.InfoFormat("Found User: {0}", u );
+                    return u;
+
                 }
             }
-            logger.Trace("User not found with ID: {0}", id);
-            return Optional.Empty<User>();
         }
+        log.InfoFormat("User not found with ID: {0}", id);
+        return null;
+    }
 
-        public IEnumerable<User> FindAll()
+    public IEnumerable<User> findAll()
+    {
+        log.InfoFormat("Finding All Users");
+        IDbConnection con = DBUtils.getConnection(props);
+        IList<User> users = new List<User>();
+        using (var comm = con.CreateCommand())
         {
-            logger.Trace("Finding all Users");
-            List<User> users = new List<User>();
-            using (SqlConnection connection = dbUtils.GetConnection())
+            comm.CommandText = "SELECT * FROM user; ";
+
+            using (var dataR = comm.ExecuteReader())
             {
-                string query = "SELECT * FROM user;";
-                using (SqlCommand command = new SqlCommand(query, connection))
+                while (dataR.Read())
                 {
-                    connection.Open();
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            int userId = reader.GetInt32("id");
-                            string username = reader.GetString("username");
-                            string password = reader.GetString("password");
-                            User user = new User(username, password);
-                            user.Id = userId;
-                            users.Add(user);
-                        }
-                    }
+                    int id = dataR.GetInt32(0);
+                    string username = dataR.GetString(1);
+                    string password = dataR.GetString(2);
+                    User u = new User(username, password);
+                    u.Id = id;
+                    users.Add(u);
                 }
             }
-            logger.Trace("Found {0} Users", users.Count);
-            return users;
         }
+        return users;
+    }
 
-        public Optional<User> Save(User entity)
-        {
-            logger.Trace("Saving User: {0}", entity);
-            using (SqlConnection connection = dbUtils.GetConnection())
-            {
-                string query = "INSERT INTO user (username, password) VALUES (@username, @password);";
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@username", entity.Username);
-                    command.Parameters.AddWithValue("@password", entity.Password);
-                    connection.Open();
-                    int rowsAffected = command.ExecuteNonQuery();
-                    logger.Trace("Saved {0} instances", rowsAffected);
-                }
-            }
-            return Optional.Empty<User>();
-        }
+    public void save(User entity)
+    {
+        log.InfoFormat("Saving User: {0}", entity);
 
-        public Optional<User> Delete(int id)
-        {
-            logger.Trace("Deleting User with ID: {0}", id);
-            using (SqlConnection connection = dbUtils.GetConnection())
-            {
-                string query = "DELETE FROM user WHERE id=@id;";
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@id", id);
-                    connection.Open();
-                    int rowsAffected = command.ExecuteNonQuery();
-                    logger.Trace("Deleted {0} instances", rowsAffected);
-                }
-            }
-            return Optional.Empty<User>();
-        }
+        var connection = DBUtils.getConnection(props);
 
-        public Optional<User> Update(int id, User entity)
+        using (var command = connection.CreateCommand())
         {
-            logger.Trace("Updating User with ID: {0}", id);
-            using (SqlConnection connection = dbUtils.GetConnection())
+            command.CommandText = "INSERT INTO user (username, password) VALUES (@username, @password);";
+
+            var username = command.CreateParameter();
+            username.ParameterName = "@username";
+            username.Value = entity.Username;
+            command.Parameters.Add(username);
+
+            var password= command.CreateParameter();
+            password.ParameterName = "@password";
+            password.Value = entity.Password;
+            command.Parameters.Add(password);
+           
+            var result = command.ExecuteNonQuery();
+            if (result == 0)
             {
-                string query = "UPDATE user SET password=@password WHERE id=@id;";
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@password", entity.Password);
-                    command.Parameters.AddWithValue("@id", id);
-                    connection.Open();
-                    int rowsAffected = command.ExecuteNonQuery();
-                    logger.Trace("Updated {0} instances", rowsAffected);
-                }
+                log.InfoFormat("User {0} NOT saved", entity);
+                throw new Exception("No user added!");
+
             }
-            return Optional.Empty<User>();
+            log.InfoFormat("User{0} saved", entity);
+
         }
     }
+
+    public void delete(int id)
+    {
+        log.InfoFormat("Deleting User with ID: {0}", id);
+        IDbConnection connection = DBUtils.getConnection(props);
+        using (var comm = connection.CreateCommand())
+        {
+            comm.CommandText = "DELETE FROM user WHERE id=@id;";
+            IDbDataParameter paramId = comm.CreateParameter();
+            paramId.ParameterName = "@id";
+            paramId.Value = id;
+            comm.Parameters.Add(paramId);
+            var dataR = comm.ExecuteNonQuery();
+            if (dataR == 0)
+            {
+                log.InfoFormat("User with ID {0} NOT deleted", id);
+                throw new Exception("No deleted user!");
+            }
+        }
+    }
+
+    public void update(User entity)
+    {
+       
+    }
 }
+

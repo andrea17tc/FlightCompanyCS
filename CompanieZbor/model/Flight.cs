@@ -1,16 +1,15 @@
 ﻿namespace CompanieZbor.model;
-
 public class Flight : Entity<int>
 { 
     private string destination;
-    private DateTime dateTime;
+    private DateTime date;
     private string airport;
     private int noTotalSeats;
 
-    public Flight(string destination, DateTime dateTime, string airport, int noSeats)
+    public Flight(string destination, DateTime date, string airport, int noSeats)
     {
         this.destination = destination;
-        this.dateTime = dateTime;
+        this.date = date;
         this.airport = airport;
         this.noTotalSeats = noSeats;
     }
@@ -21,10 +20,10 @@ public class Flight : Entity<int>
         set { destination = value; }
     }
 
-    public DateTime DateTime
+    public DateTime Date
     {
-        get { return dateTime; }
-        set { dateTime = value; }
+        get { return date; }
+        set { date = value; }
     }
 
     public string Airport
@@ -50,12 +49,17 @@ public class Flight : Entity<int>
         Flight flight = (Flight)obj;
         return noTotalSeats == flight.noTotalSeats &&
                destination == flight.destination &&
-               dateTime == flight.dateTime &&
+               date == flight.date &&
                airport == flight.airport;
     }
 
     public override string ToString()
     {
-        return $"Flight{{destination='{destination}', dateTime={dateTime}, airport='{airport}', noSeats={noTotalSeats}}}";
+        return $"Flight to {destination} at {date} from {airport}. Number of Seats={noTotalSeats}";
+    }
+
+    public override int GetHashCode()
+    {
+        throw new NotImplementedException();
     }
 }

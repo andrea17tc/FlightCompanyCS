@@ -1,15 +1,16 @@
-﻿namespace CompanieZbor.repository;
+﻿using CompanieZbor.model;
+using System.Collections.Generic;
 
-public interface IRepository<ID, E : Entity<int>>
+namespace CompanieZbor.repository;
+public interface IRepository<ID, E> where E:Entity<ID>
 {
     E? findOne(ID id);
-    
     IEnumerable<E> findAll();
     
-    E? save(E entity);
+    void save(E entity);
     
-    E? delete(ID id);
-    
-    E? update(E entity);
+    void delete(ID id);
+   
+    void update(E entity);
     
 }

@@ -1,121 +1,152 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
-using Ro.Mpp2024.Model;
+using CompanieZbor.model;
+using CompanieZbor.utils;
+using log4net;
 
-namespace Ro.Mpp2024.Repository
+namespace CompanieZbor.repository;
+
+public class TouristRepository : IRepository<int, Tourist>
 {
-    public class TouristRepository : IRepository<int, Tourist>
+    private static readonly ILog log = LogManager.GetLogger("Tourist Repository");
+
+    IDictionary<String, string> props;
+
+    public TouristRepository(IDictionary<String, string> props)
     {
-        private static readonly ILog log = LogManager.GetLogger("Tourist Repository");
-        
-        IDictionary<String, string> props;
+        log.Info("Creating TouristRepository ");
+        this.props = props;
+    }
 
-        public TouristRepository(IDictionary<String, string> props)
+
+    public Tourist? findOne(int id)
+    {
+        log.InfoFormat("Finding Tourist by ID: {0}", id);
+        IDbConnection con = DBUtils.getConnection(props);
+
+        using (var comm = con.CreateCommand())
         {
-            log.Info("Creating TouristRepository ");
-            this.props = props;
-        }
+            comm.CommandText = "SELECT * FROM tourist WHERE id=@id; ";
+            IDbDataParameter paramId = comm.CreateParameter();
+            paramId.ParameterName = "@id";
+            paramId.Value = id;
+            comm.Parameters.Add(paramId);
 
-
-        public Optional<Tourist> FindOne(int id)
-        {
-            logger.Trace("Finding Tourist by ID: {0}", id);
-            using (SqlConnection connection = dbUtils.GetConnection())
+            using (var dataR = comm.ExecuteReader())
             {
-                string query = "SELECT * FROM tourist WHERE id=@id;";
-                using (SqlCommand command = new SqlCommand(query, connection))
+                if (dataR.Read())
                 {
-                    command.Parameters.AddWithValue("@id", id);
-                    connection.Open();
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            string name = reader.GetString("name");
-                            Tourist tourist = new Tourist(name);
-                            tourist.Id = id;
-                            logger.Trace("Found Tourist: {0}", tourist);
-                            return Optional.Of(tourist);
-                        }
-                    }
+                    string name = dataR.GetString(1);
+                    Tourist tourist = new Tourist(name);
+                    tourist.Id = id;
+                    log.InfoFormat("Found Tourist: {0}", tourist);
+                    return tourist;
+
                 }
             }
-            logger.Trace("Tourist not found with ID: {0}", id);
-            return Optional.Empty<Tourist>();
         }
+        log.InfoFormat("Tourist not found with ID: {0}", id);
+        return null;
+    }
 
-        public IEnumerable<Tourist> FindAll()
+    public IEnumerable<Tourist> findAll()
+    {
+        log.InfoFormat("Finding All Tourists");
+        IDbConnection con = DBUtils.getConnection(props);
+        IList<Tourist> tourists = new List<Tourist>();
+        using (var comm = con.CreateCommand())
         {
-            logger.Trace("Finding all Tourists");
-            List<Tourist> tourists = new List<Tourist>();
-            using (SqlConnection connection = dbUtils.GetConnection())
+            comm.CommandText = "SELECT * FROM tourist; ";
+
+            using (var dataR = comm.ExecuteReader())
             {
-                string query = "SELECT * FROM tourist;";
-                using (SqlCommand command = new SqlCommand(query, connection))
+                while (dataR.Read())
                 {
-                    connection.Open();
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            int touristId = reader.GetInt32("id");
-                            string name = reader.GetString("name");
-                            Tourist tourist = new Tourist(name);
-                            tourist.Id = touristId;
-                            tourists.Add(tourist);
-                        }
-                    }
+                    int id = dataR.GetInt32(0);
+                    string name = dataR.GetString(1);
+                    Tourist tourist = new Tourist(name);
+                    tourist.Id = id;
+                    tourists.Add(tourist);
+
                 }
             }
-            logger.Trace("Found {0} Tourists", tourists.Count);
-            return tourists;
         }
+        return tourists;
+    }
 
-        public Optional<Tourist> Save(Tourist entity)
+    public void save(Tourist entity)
+    {
+        log.InfoFormat("Saving Tourist: {0}", entity);
+
+        var connection = DBUtils.getConnection(props);
+
+        using (var command = connection.CreateCommand())
         {
-            logger.Trace("Saving Tourist: {0}", entity);
-            using (SqlConnection connection = dbUtils.GetConnection())
+            command.CommandText = "INSERT INTO tourist (name) VALUES (@name);";
+
+            var name = command.CreateParameter();
+            name.ParameterName = "@name";
+            name.Value = entity.TouristName;
+            command.Parameters.Add(name);
+
+            var result = command.ExecuteNonQuery();
+            if (result == 0)
             {
-                string query = "INSERT INTO tourist (name) VALUES (@name);";
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@name", entity.Name);
-                    connection.Open();
-                    int rowsAffected = command.ExecuteNonQuery();
-                    logger.Trace("Saved {0} instances", rowsAffected);
-                }
+                log.InfoFormat("Tourist {0} NOT saved", entity);
+                throw new Exception("No tourist added!");
+
             }
-            return Optional.Empty<Tourist>();
-        }
+            log.InfoFormat("Tourist {0} saved", entity);
 
-        public Optional<Tourist> Delete(int id)
+        }
+    }
+
+    public void delete(int id)
+    {
+        log.InfoFormat("Deleting Tourist with ID: {0}", id);
+        IDbConnection connection = DBUtils.getConnection(props);
+        using (var comm = connection.CreateCommand())
         {
-            logger.Trace("Deleting Tourist with ID: {0}", id);
-            using (SqlConnection connection = dbUtils.GetConnection())
+            comm.CommandText = "DELETE FROM tourist WHERE id=@id;";
+            IDbDataParameter paramId = comm.CreateParameter();
+            paramId.ParameterName = "@id";
+            paramId.Value = id;
+            comm.Parameters.Add(paramId);
+            var dataR = comm.ExecuteNonQuery();
+            if (dataR == 0)
             {
-                string query = "DELETE FROM tourist WHERE id=@id;";
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@id", id);
-                    connection.Open();
-                    int rowsAffected = command.ExecuteNonQuery();
-                    logger.Trace("Deleted {0} instances", rowsAffected);
-                }
+                log.InfoFormat("Tourist with ID {0} NOT deleted", id);
+                throw new Exception("No deleted tourist!");
             }
-            return Optional.Empty<Tourist>();
         }
 
-        public Optional<Tourist> Update(int id, Tourist entity)
+    }
+
+    public void update(Tourist entity)
+    {
+        log.InfoFormat("Updating Flight with ID: {0}", entity.Id);
+        IDbConnection connection = DBUtils.getConnection(props);
+        using (var command = connection.CreateCommand())
         {
-            logger.Trace("Updating Tourist with ID: {0}", id);
-            using (SqlConnection connection = dbUtils.GetConnection())
+            command.CommandText = "UPDATE tourist SET name=@name WHERE id=@id;";
+            IDbDataParameter name = command.CreateParameter();
+            name.ParameterName = "@name";
+            name.Value = entity.TouristName;
+            command.Parameters.Add(name);
+
+            IDbDataParameter id = command.CreateParameter();
+            id.ParameterName = "@id";
+            id.Value = entity.Id;
+            command.Parameters.Add(id);
+
+            var result = command.ExecuteNonQuery();
+            if (result == 0)
             {
-                string query = "UPDATE tourist SET name=@name WHERE id=@id;";
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@name", entity.Name);
-                    command.Parameters.AddWithValue("@id", id);
-                    connection.Open();
-                    int rowsAffected = command.ExecuteNonQuery();
-                    logger.Trace("Updated {0} instances", rowsAffected);
+                log.InfoFormat("Tourist {0} NOT updated", entity);
+                throw new Exception("Tourist NOT updated");
+            }
+        }
+    }
+}

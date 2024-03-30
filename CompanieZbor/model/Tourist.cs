@@ -1,10 +1,9 @@
 ﻿namespace CompanieZbor.model;
-
 public class Tourist : Entity<int>
 {
     private string touristName;
     
-    public Tourist(String touristName) {
+    public Tourist(string touristName) {
         this.touristName = touristName;
     }
 
@@ -28,5 +27,10 @@ public class Tourist : Entity<int>
     public override string ToString()
     {
         return touristName+ '\n';
+    }
+
+    public override int GetHashCode()
+    {
+        throw new NotImplementedException();
     }
 }

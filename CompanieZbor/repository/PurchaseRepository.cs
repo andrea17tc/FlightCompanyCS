@@ -1,153 +1,201 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
-using Ro.Mpp2024.Model;
+using CompanieZbor.model;
+using CompanieZbor.utils;
+using log4net;
 
-namespace Ro.Mpp2024.Repository
+namespace CompanieZbor.repository;
+public class PurchaseRepository : IRepository<int, Purchase>
 {
-    public class PurchaseRepository : IRepository<int, Purchase>
+    private readonly FlightRepository flightRepository;
+    private readonly UserRepository userRepository;
+    private readonly TouristRepository touristRepository;
+    private static readonly ILog log = LogManager.GetLogger("Purchase Repository");
+    IDictionary<String, string> props;
+
+    public PurchaseRepository(IDictionary<String, string> props)
     {
-        private readonly FlightRepository flightRepository;
-        private readonly UserRepository userRepository;
-        private readonly TouristRepository touristRepository;
-        private static readonly ILog log = LogManager.GetLogger("Purchase Repository");
-        IDictionary<String, string> props;
+        log.Info("Creating UserRepository ");
+        this.props = props;
+    }
 
-        public UserRepository(IDictionary<String, string> props)
-        {
-            log.Info("Creating UserRepository ");
-            this.props = props;
-        }
+    public PurchaseRepository(IDictionary<String, string> props, FlightRepository flightRepository, UserRepository userRepository,
+                          TouristRepository touristRepository)
+    {
+        log.Info("Creating PurchaseRepository ");
+        this.props = props;
+        this.flightRepository = flightRepository;
+        this.userRepository = userRepository;
+        this.touristRepository = touristRepository;
+    }
 
-        public PurchaseRepository(IDictionary<String, string> props, FlightRepository flightRepository, UserRepository userRepository,
-                              TouristRepository touristRepository)
-        {
-            log.Info("Creating PurchaseRepository ");
-            this.props = props;
-            this.flightRepository = flightRepository;
-            this.userRepository = userRepository;
-            this.touristRepository = touristRepository;
-        }
+    public Purchase? findOne(int id)
+    {
+        log.InfoFormat("Finding Purchase by ID: {0}", id);
+        IDbConnection con = DBUtils.getConnection(props);
 
-        public Optional<Purchase> FindOne(int id)
+        using (var comm = con.CreateCommand())
         {
-            logger.Trace("Finding Purchase by ID: {0}", id);
-            using (SqlConnection connection = dbUtils.GetConnection())
+            comm.CommandText = "SELECT * FROM purchase WHERE id=@id; ";
+            IDbDataParameter paramId = comm.CreateParameter();
+            paramId.ParameterName = "@id";
+            paramId.Value = id;
+            comm.Parameters.Add(paramId);
+
+            using (var dataR = comm.ExecuteReader())
             {
-                string query = "SELECT * FROM purchase WHERE id=@id;";
-                using (SqlCommand command = new SqlCommand(query, connection))
+                if (dataR.Read())
                 {
-                    command.Parameters.AddWithValue("@id", id);
-                    connection.Open();
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            int flightID = reader.GetInt32("flightID");
-                            int userID = reader.GetInt32("userID");
-                            int touristID = reader.GetInt32("touristID");
-                            string clientAddress = reader.GetString("clientAdress");
-                            Flight flight = flightRepository.FindOne(flightID).Value;
-                            User user = userRepository.FindOne(userID).Value;
-                            Tourist tourist = touristRepository.FindOne(touristID).Value;
-                            Purchase purchase = new Purchase(flight, user, tourist, clientAddress);
-                            purchase.Id = id;
-                            logger.Trace("Found Purchase: {0}", purchase);
-                            return Optional.Of(purchase);
-                        }
-                    }
+                    int flightID = dataR.GetInt32(1);
+                    int userID = dataR.GetInt32(2);
+                    int touristID = dataR.GetInt32(3);
+                    string clientAdress = dataR.GetString(4);
+                    int noBookedSeats = dataR.GetInt32(5);
+
+                    Flight f = flightRepository.findOne(flightID);
+                    User u = userRepository.findOne(userID);
+                    Tourist t = touristRepository.findOne(touristID);
+
+                    Purchase p = new Purchase(f, u, t, clientAdress, noBookedSeats);
+
+
+                  
+                    log.InfoFormat("Found Purchase: {0}", p);
+                    return p;
+
                 }
             }
-            logger.Trace("Purchase not found with ID: {0}", id);
-            return Optional.Empty<Purchase>();
         }
+        log.InfoFormat("Purchase not found with ID: {0}", id);
+        return null;
+    }
 
-        public IEnumerable<Purchase> FindAll()
+    public IEnumerable<Purchase> findAll()
+    {
+        log.InfoFormat("Finding All Purchases");
+        IDbConnection con = DBUtils.getConnection(props);
+        IList<Purchase> purchases = new List<Purchase>();
+        using (var comm = con.CreateCommand())
         {
-            logger.Trace("Finding all Purchases");
-            List<Purchase> purchases = new List<Purchase>();
-            using (SqlConnection connection = dbUtils.GetConnection())
+            comm.CommandText = "SELECT * FROM purchase; ";
+
+            using (var dataR = comm.ExecuteReader())
             {
-                string query = "SELECT * FROM purchase;";
-                using (SqlCommand command = new SqlCommand(query, connection))
+                while (dataR.Read())
                 {
-                    connection.Open();
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            int id = reader.GetInt32("id");
-                            int flightID = reader.GetInt32("flightID");
-                            int userID = reader.GetInt32("userID");
-                            int touristID = reader.GetInt32("touristID");
-                            string clientAddress = reader.GetString("clientAdress");
-                            Flight flight = flightRepository.FindOne(flightID).Value;
-                            User user = userRepository.FindOne(userID).Value;
-                            Tourist tourist = touristRepository.FindOne(touristID).Value;
-                            Purchase purchase = new Purchase(flight, user, tourist, clientAddress);
-                            purchase.Id = id;
-                            purchases.Add(purchase);
-                        }
-                    }
+                    int flightID = dataR.GetInt32(1);
+                    int userID = dataR.GetInt32(2);
+                    int touristID = dataR.GetInt32(3);
+                    string clientAdress = dataR.GetString(4);
+                    int noBookedSeats = dataR.GetInt32(5);
+
+                    Flight f = flightRepository.findOne(flightID);
+                    User u = userRepository.findOne(userID);
+                    Tourist t = touristRepository.findOne(touristID);
+
+                    Purchase p = new Purchase(f, u, t, clientAdress, noBookedSeats);
+                    purchases.Add(p);
+
                 }
             }
-            logger.Trace("Found {0} Purchases", purchases.Count);
-            return purchases;
         }
+        return purchases;
+    }
 
-        public Optional<Purchase> Save(Purchase entity)
+    public void save(Purchase entity)
+    {
+        log.InfoFormat("Saving Purchase: {0}", entity);
+
+        var connection = DBUtils.getConnection(props);
+
+        using (var command = connection.CreateCommand())
         {
-            logger.Trace("Saving Purchase: {0}", entity);
-            using (SqlConnection connection = dbUtils.GetConnection())
+            command.CommandText = "INSERT INTO purchase (flightID, userID, touristID, clientAdress, noBookedSeats) VALUES (@flightID, @userID, @touristID, @noBookedSeats);";
+
+            var flightID = command.CreateParameter();
+            flightID.ParameterName = "@flightID";
+            flightID.Value = entity.Flight.Id;
+            command.Parameters.Add(flightID);
+
+            var userID = command.CreateParameter();
+            userID.ParameterName = "@userID";
+            userID.Value = entity.User.Id;
+            command.Parameters.Add(userID);
+
+            var touristID = command.CreateParameter();
+            touristID.ParameterName = "@touristID";
+            touristID.Value = entity.Tourist.Id;
+            command.Parameters.Add(touristID);
+
+            var clientAdress = command.CreateParameter();
+            clientAdress.ParameterName = "@clientAdress";
+            clientAdress.Value = entity.ClientAddress;
+            command.Parameters.Add(clientAdress);
+
+            var noSeats = command.CreateParameter();
+            noSeats.ParameterName = "@noBookedSeats";
+            noSeats.Value = entity.NoBookedSeats;
+            command.Parameters.Add(noSeats);
+
+            var result = command.ExecuteNonQuery();
+            if (result == 0)
             {
-                string query = "INSERT INTO purchase (flightID, userID, touristID, clientAdress) VALUES (@flightID, @userID, @touristID, @clientAddress);";
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@flightID", entity.Flight.Id);
-                    command.Parameters.AddWithValue("@userID", entity.User.Id);
-                    command.Parameters.AddWithValue("@touristID", entity.Tourist.Id);
-                    command.Parameters.AddWithValue("@clientAddress", entity.ClientAddress);
-                    connection.Open();
-                    int rowsAffected = command.ExecuteNonQuery();
-                    logger.Trace("Saved {0} instances", rowsAffected);
-                }
+                log.InfoFormat("Purchase {0} NOT saved", entity);
+                throw new Exception("No purchase added!");
+
             }
-            return Optional.Empty<Purchase>();
+            log.InfoFormat("Purchase {0} saved", entity);
+
         }
+    }
 
-        public Optional<Purchase> Delete(int id)
+    public void delete(int id)
+    {
+        log.InfoFormat("Deleting Purchase with ID: {0}", id);
+        IDbConnection connection = DBUtils.getConnection(props);
+        using (var comm = connection.CreateCommand())
         {
-            logger.Trace("Deleting Purchase with ID: {0}", id);
-            using (SqlConnection connection = dbUtils.GetConnection())
+            comm.CommandText = "DELETE FROM purchase WHERE id=@id;";
+            IDbDataParameter paramId = comm.CreateParameter();
+            paramId.ParameterName = "@id";
+            paramId.Value = id;
+            comm.Parameters.Add(paramId);
+            var dataR = comm.ExecuteNonQuery();
+            if (dataR == 0)
             {
-                string query = "DELETE FROM purchase WHERE id=@id;";
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@id", id);
-                    connection.Open();
-                    int rowsAffected = command.ExecuteNonQuery();
-                    logger.Trace("Deleted {0} instances", rowsAffected);
-                }
+                log.InfoFormat("Purchase with ID {0} NOT deleted", id);
+                throw new Exception("No deleted purchase!");
             }
-            return Optional.Empty<Purchase>();
         }
+    }
 
-        public Optional<Purchase> Update(int id, Purchase entity)
+    public void update(Purchase entity)
+    {
+
+        log.InfoFormat("Updating Purchase with ID: {0}", entity.Id);
+        IDbConnection connection = DBUtils.getConnection(props);
+        using (var command = connection.CreateCommand())
         {
-            logger.Trace("Updating Purchase with ID: {0}", id);
-            using (SqlConnection connection = dbUtils.GetConnection())
+            command.CommandText = "UPDATE purchase SET clientAdress=@clientAdress WHERE id=@id;";
+            IDbDataParameter clientAdress = command.CreateParameter();
+            clientAdress.ParameterName = "@clientAdress";
+            clientAdress.Value = entity.ClientAddress;
+            command.Parameters.Add(clientAdress);
+
+            IDbDataParameter id = command.CreateParameter();
+            id.ParameterName = "@id";
+            id.Value = entity.Id;
+            command.Parameters.Add(id);
+
+            var result = command.ExecuteNonQuery();
+            if (result == 0)
             {
-                string query = "UPDATE purchase SET clientAdress=@clientAddress WHERE id=@id;";
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@clientAddress", entity.ClientAddress);
-                    command.Parameters.AddWithValue("@id", id);
-                    connection.Open();
-                    int rowsAffected = command.ExecuteNonQuery();
-                    logger.Trace("Updated {0} instances", rowsAffected);
-                }
+                log.InfoFormat("Purchase {0} NOT updated", entity);
+                throw new Exception("Purchase NOT updated");
             }
-            return Optional.Empty<Purchase>();
         }
     }
 }
+

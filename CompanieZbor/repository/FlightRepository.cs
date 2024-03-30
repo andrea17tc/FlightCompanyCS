@@ -1,138 +1,184 @@
-﻿using System;
+﻿using CompanieZbor.model;
+using log4net;
+using log4net.Repository.Hierarchy;
+using System;
 using System.Collections.Generic;
 using System.Data;
-using Ro.Mpp2024.Model;
+using System.Data.SqlClient;
+using CompanieZbor.utils;
 
-namespace Ro.Mpp2024.Repository
+namespace CompanieZbor.repository;
+public class FlightRepository : IRepository<int, Flight>
 {
-    public class FlightRepository : IRepository<int, Flight>
+    private static readonly ILog log = LogManager.GetLogger("FlightRepository");
+
+    IDictionary<String, string> props;
+
+    public FlightRepository(IDictionary<String, string> props)
     {
-        private static readonly ILog log = LogManager.GetLogger("Flight Repository");
+        log.Info("Creating FlightRepository ");
+        this.props = props;
+    }
 
-        IDictionary<String, string> props;
+    public Flight? findOne(int id)
+    {
+        log.InfoFormat("Finding Flight by ID: {0}", id);
+        IDbConnection con = DBUtils.getConnection(props);
 
-        public FlightRepository(IDictionary<String, string> props)
+        using (var comm = con.CreateCommand())
         {
-            log.Info("Creating FlightRepository ");
-            this.props = props;
-        }
+            comm.CommandText = "SELECT * FROM flight WHERE id=@id; ";
+            IDbDataParameter paramId = comm.CreateParameter();
+            paramId.ParameterName = "@id";
+            paramId.Value = id;
+            comm.Parameters.Add(paramId);
 
-        public Flight? findOne(int id)
-        {
-            log.InfoFormat("Finding Flight by ID: {0}", id);
-            IDbConnection con = DBUtils.getConnection(props);
-
-            using (var connection = con.CreateConnection())
+            using (var dataR = comm.ExecuteReader())
             {
-                string query = "SELECT * FROM flight WHERE id=@id;";
-                using (SqlCommand command = new SqlCommand(query, connection))
+                if (dataR.Read())
                 {
-                    command.Parameters.AddWithValue("@id", id);
-                    connection.Open();
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            string destination = reader.GetString("destination");
-                            DateTime date = reader.GetDateTime("date");
-                            string airport = reader.GetString("airport");
-                            int noSeats = reader.GetInt32("noTotalSeats");
-                            Flight flight = new Flight(destination, date, airport, noSeats);
-                            flight.Id = id;
-                            logger.Trace("Found Flight: {0}", flight);
-                            return Optional.Of(flight);
-                        }
-                    }
+                    string destination = dataR.GetString(1);
+                    string d = dataR.GetString(2);
+                    DateTime date = DateTime.Parse(d);
+                    string airport = dataR.GetString(3);
+                    int noSeats = dataR.GetInt32(4);
+                    Flight flight = new Flight(destination, date, airport, noSeats);
+                    flight.Id = id;
+                    log.InfoFormat("Found Flight: {0}", flight);
+                    return flight;
+
                 }
             }
-            log.Trace("Flight not found with ID: {0}", id);
-            return Optional.Empty<Flight>();
         }
+        log.InfoFormat("Flight not found with ID: {0}", id);
+        return null;
+    }
 
-        public IEnumerable<Flight> FindAll()
+    public IEnumerable<Flight> findAll()
+    {
+        log.InfoFormat("Finding All Flights");
+        IDbConnection con = DBUtils.getConnection(props);
+        IList<Flight> flights = new List<Flight>();
+        using (var comm = con.CreateCommand())
         {
-            log.Trace("Finding all Flights");
-            List<Flight> flights = new List<Flight>();
-            using (SqlConnection connection = dbUtils.GetConnection())
+            comm.CommandText = "SELECT * FROM flight; ";
+
+            using (var dataR = comm.ExecuteReader())
             {
-                string query = "SELECT * FROM flight;";
-                using (SqlCommand command = new SqlCommand(query, connection))
+                while (dataR.Read())
                 {
-                    connection.Open();
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            int id = reader.GetInt32("id");
-                            string destination = reader.GetString("destination");
-                            DateTime date = reader.GetDateTime("date");
-                            string airport = reader.GetString("airport");
-                            int noSeats = reader.GetInt32("noTotalSeats");
-                            Flight flight = new Flight(destination, date, airport, noSeats);
-                            flight.Id = id;
-                            flights.Add(flight);
-                        }
-                    }
+                    int id = dataR.GetInt32(0);
+                    string destination = dataR.GetString(1);
+                    string d = dataR.GetString(2);
+                    DateTime date = DateTime.Parse(d) ; 
+                    string airport = dataR.GetString(3);
+                    int noSeats = dataR.GetInt32(4);
+                    Flight flight = new Flight(destination, date, airport, noSeats);
+                    flight.Id = id;
+                    flights.Add(flight);
+
                 }
             }
-            log.Trace("Found {0} Flights", flights.Count);
-            return flights;
         }
+        return flights;
+    }
 
-        public Optional<Flight> Save(Flight entity)
+    public void save(Flight entity)
+    {
+        log.InfoFormat("Saving Flight: {0}", entity);
+
+        var connection = DBUtils.getConnection(props);
+
+        using (var command = connection.CreateCommand())
         {
-            log.Trace("Saving Flight: {0}", entity);
-            using (SqlConnection connection = dbUtils.GetConnection())
+            command.CommandText = "INSERT INTO flight (destination, date, airport, noTotalSeats) VALUES (@destination, @date, @airport, @noTotalSeats);";
+            
+            var destination = command.CreateParameter();
+            destination.ParameterName = "@destination";
+            destination.Value = entity.Destination;
+            command.Parameters.Add(destination);
+
+            var date = command.CreateParameter();
+            date.ParameterName = "@date";
+            date.Value = entity.Date.ToString();
+            command.Parameters.Add(date);
+
+            var airport = command.CreateParameter();
+            airport.ParameterName = "@airport";
+            airport.Value = entity.Airport;
+            command.Parameters.Add(airport);
+
+            var noSeats = command.CreateParameter();
+            noSeats.ParameterName = "@noTotalSeats";
+            noSeats.Value = entity.NoTotalSeats;
+            command.Parameters.Add(noSeats);
+
+            var result = command.ExecuteNonQuery();
+            if(result== 0)
             {
-                string query = "INSERT INTO flight (destination, date, airport, noTotalSeats) VALUES (@destination, @date, @airport, @noTotalSeats);";
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@destination", entity.Destination);
-                    command.Parameters.AddWithValue("@date", entity.DateTime);
-                    command.Parameters.AddWithValue("@airport", entity.Airport);
-                    command.Parameters.AddWithValue("@noTotalSeats", entity.NoTotalSeats);
-                    connection.Open();
-                    int rowsAffected = command.ExecuteNonQuery();
-                    log.Trace("Saved {0} instances", rowsAffected);
-                }
+                log.InfoFormat("Flight {0} NOT saved", entity);
+                throw new Exception("No flight added!");
+                
             }
-            return Optional.Empty<Flight>();
+            log.InfoFormat("Flight {0} saved", entity);
+
         }
+        
+    }
 
-        public Optional<Flight> Delete(int id)
+    public void delete(int id)
+    {
+        log.InfoFormat("Deleting Flight with ID: {0}", id);
+        IDbConnection connection = DBUtils.getConnection(props);
+        using (var comm = connection.CreateCommand())
         {
-            log.Trace("Deleting Flight with ID: {0}", id);
-            using (SqlConnection connection = dbUtils.GetConnection())
+            comm.CommandText = "DELETE FROM flight WHERE id=@id;";
+            IDbDataParameter paramId = comm.CreateParameter();
+            paramId.ParameterName = "@id";
+            paramId.Value = id;
+            comm.Parameters.Add(paramId);
+            var dataR = comm.ExecuteNonQuery();
+            if(dataR== 0)
             {
-                string query = "DELETE FROM flight WHERE id=@id;";
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@id", id);
-                    connection.Open();
-                    int rowsAffected = command.ExecuteNonQuery();
-                    log.Trace("Deleted {0} instances", rowsAffected);
-                }
+                log.InfoFormat("Flight with ID {0} NOT deleted", id);
+                throw new Exception("No deleted flight!");
             }
-            return Optional.Empty<Flight>();
         }
+       
+    }
 
-        public Optional<Flight> Update(int id, Flight entity)
+    public void update(Flight entity)
+    {
+        log.InfoFormat("Updating Flight with ID: {0}", entity.Id);
+        IDbConnection connection = DBUtils.getConnection(props);
+        using (var command = connection.CreateCommand())
         {
-            log.Trace("Updating Flight with ID: {0}", id);
-            using (SqlConnection connection = dbUtils.GetConnection())
+            command.CommandText = "UPDATE flight SET date=@date WHERE id=@id;";
+            IDbDataParameter date = command.CreateParameter();
+            date.ParameterName = "@date";
+            date.Value = entity.Date.ToString();
+            Console.WriteLine(date.Value);
+            command.Parameters.Add(date);
+
+           /* IDbDataParameter airport = command.CreateParameter();
+            airport.ParameterName = "@airport";
+            airport.Value = entity.Airport;
+            command.Parameters.Add(airport);*/
+
+            IDbDataParameter id = command.CreateParameter();
+            id.ParameterName = "@id";
+            id.Value = entity.Id;
+            command.Parameters.Add(id);
+
+
+            var result = command.ExecuteNonQuery();
+            if (result== 0)
             {
-                string query = "UPDATE flight SET date=@date, airport=@airport WHERE id=@id;";
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@date", entity.DateTime);
-                    command.Parameters.AddWithValue("@airport", entity.Airport);
-                    command.Parameters.AddWithValue("@id", id);
-                    connection.Open();
-                    int rowsAffected = command.ExecuteNonQuery();
-                    log.Trace("Updated {0} instances", rowsAffected);
-                }
+                log.InfoFormat("Flight {0} NOT updated", entity);
+                throw new Exception("Flight NOT updated");
             }
-            return Optional.Empty<Flight>();
         }
     }
+
 }
+

@@ -1,12 +1,10 @@
 ﻿using System.Security.Permissions;
 using System.Runtime.Serialization;
 
-namespace  CompanieZbor.model 
-
-[Serializable]
+namespace CompanieZbor.model;
 public class Entity<ID>
 {
-    protected ID id;
+    protected ID? id;
 
     public ID Id
     {

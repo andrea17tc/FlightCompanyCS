@@ -1,137 +1,152 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
-using Ro.Mpp2024.Model;
+using CompanieZbor.model;
+using CompanieZbor.utils;
+using log4net;
 
-namespace Ro.Mpp2024.Repository
+namespace CompanieZbor.repository;
+
+public class TripRepository : IRepository<int, Trip>
 {
-    public class TripRepository : IRepository<int, Trip>
+    private readonly TouristRepository touristRepository;
+    private readonly PurchaseRepository purchaseRepository;
+    private static readonly ILog log = LogManager.GetLogger("Trip Repository");
+    IDictionary<String, string> props;
+
+    public TripRepository(IDictionary<String, string> props, TouristRepository touristRepository, PurchaseRepository purchaseRepository)
     {
-        private readonly TouristRepository touristRepository;
-        private readonly PurchaseRepository purchaseRepository;
-        private static readonly ILog log = LogManager.GetLogger("Trip Repository");
-        IDictionary<String, string> props;
+        log.Info("Creating UserRepository ");
+        this.props = props;
+        this.touristRepository = touristRepository;
+        this.purchaseRepository = purchaseRepository;
+    }
 
-        public TripRepository(IDictionary<String, string> props, TouristRepository touristRepository, PurchaseRepository purchaseRepository)
+
+    public Trip? findOne(int id)
+    {
+        log.InfoFormat("Finding Trip by ID: {0}", id);
+        IDbConnection con = DBUtils.getConnection(props);
+
+        using (var comm = con.CreateCommand())
         {
-            log.Info("Creating UserRepository ");
-            this.props = props;
-            this.touristRepository = touristRepository;
-            this.purchaseRepository = purchaseRepository;
-        }
+            comm.CommandText = "SELECT * FROM trip WHERE id=@id; ";
+            IDbDataParameter paramId = comm.CreateParameter();
+            paramId.ParameterName = "@id";
+            paramId.Value = id;
+            comm.Parameters.Add(paramId);
 
-
-        public Optional<Trip> FindOne(int id)
-        {
-            logger.Trace("Finding Trip by ID: {0}", id);
-            using (SqlConnection connection = dbUtils.GetConnection())
+            using (var dataR = comm.ExecuteReader())
             {
-                string query = "SELECT * FROM trip WHERE id=@id;";
-                using (SqlCommand command = new SqlCommand(query, connection))
+                if (dataR.Read())
                 {
-                    command.Parameters.AddWithValue("@id", id);
-                    connection.Open();
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            int touristID = reader.GetInt32("touristID");
-                            int purchaseID = reader.GetInt32("purchaseID");
-                            Tourist tourist = touristRepository.FindOne(touristID).Value;
-                            Purchase purchase = purchaseRepository.FindOne(purchaseID).Value;
-                            Trip trip = new Trip(tourist, purchase);
-                            trip.Id = id;
-                            logger.Trace("Found Trip: {0}", trip);
-                            return Optional.Of(trip);
-                        }
-                    }
+                    int touristID = dataR.GetInt32(1);
+                    int purchaseID = dataR.GetInt32(2);
+                    
+                    Tourist t = touristRepository.findOne(touristID);
+                    Purchase p = purchaseRepository.findOne(purchaseID);
+
+                    Trip trip = new Trip(t, p);
+                    trip.Id = id;
+
+                    log.InfoFormat("Found Trip: {0}", trip);
+                    return trip;
+
                 }
             }
-            logger.Trace("Trip not found with ID: {0}", id);
-            return Optional.Empty<Trip>();
         }
+        log.InfoFormat("Trip not found with ID: {0}", id);
+        return null;
+    }
 
-        public IEnumerable<Trip> FindAll()
+    public IEnumerable<Trip> findAll()
+    {
+        log.InfoFormat("Finding All Trips");
+        IDbConnection con = DBUtils.getConnection(props);
+        IList<Trip> trips = new List<Trip>();
+        using (var comm = con.CreateCommand())
         {
-            logger.Trace("Finding all Trips");
-            List<Trip> trips = new List<Trip>();
-            using (SqlConnection connection = dbUtils.GetConnection())
+            comm.CommandText = "SELECT * FROM trip; ";
+
+            using (var dataR = comm.ExecuteReader())
             {
-                string query = "SELECT * FROM trip;";
-                using (SqlCommand command = new SqlCommand(query, connection))
+                while (dataR.Read())
                 {
-                    connection.Open();
-                    using (SqlDataReader reader = command.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            int tripId = reader.GetInt32("id");
-                            int touristID = reader.GetInt32("touristID");
-                            int purchaseID = reader.GetInt32("purchaseID");
-                            Tourist tourist = touristRepository.FindOne(touristID).Value;
-                            Purchase purchase = purchaseRepository.FindOne(purchaseID).Value;
-                            Trip trip = new Trip(tourist, purchase);
-                            trip.Id = tripId;
-                            trips.Add(trip);
-                        }
-                    }
+                    int id= dataR.GetInt32(0);
+                    int touristID = dataR.GetInt32(1);
+                    int purchaseID = dataR.GetInt32(2);
+
+                    Tourist t = touristRepository.findOne(touristID);
+                    Purchase p = purchaseRepository.findOne(purchaseID);
+
+                    Trip trip = new Trip(t,p);
+                    trip.Id = id;
+
+                    trips.Add(trip);    
+
                 }
             }
-            logger.Trace("Found {0} Trips", trips.Count);
-            return trips;
+        }
+        return trips;
+    }
+
+    public void save(Trip entity)
+    {
+        log.InfoFormat("Saving Trip: {0}", entity);
+
+        var connection = DBUtils.getConnection(props);
+
+        using (var command = connection.CreateCommand())
+        {
+            command.CommandText = "INSERT INTO trip(touristID, purchaseID) VALUES (@touristID, @purchaseID);";
+
+            var touristID = command.CreateParameter();
+            touristID.ParameterName = "@touristID";
+            touristID.Value = entity.Tourist.Id;
+            command.Parameters.Add(touristID);
+
+            var purchaseID = command.CreateParameter();
+            purchaseID.ParameterName = "@purchaseID";
+            purchaseID.Value = entity.Purchase.Id;
+            command.Parameters.Add(purchaseID);
+
+            var result = command.ExecuteNonQuery();
+            if (result == 0)
+            {
+                log.InfoFormat("trip {0} NOT saved", entity);
+                throw new Exception("No trip added!");
+
+            }
+            log.InfoFormat("Trip {0} saved", entity);
+
         }
 
-        public Optional<Trip> Save(Trip entity)
-        {
-            logger.Trace("Saving Trip: {0}", entity);
-            using (SqlConnection connection = dbUtils.GetConnection())
-            {
-                string query = "INSERT INTO trip (touristID, purchaseID) VALUES (@touristID, @purchaseID);";
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@touristID", entity.Tourist.Id);
-                    command.Parameters.AddWithValue("@purchaseID", entity.Purchase.Id);
-                    connection.Open();
-                    int rowsAffected = command.ExecuteNonQuery();
-                    logger.Trace("Saved {0} instances", rowsAffected);
-                }
-            }
-            return Optional.Empty<Trip>();
-        }
+    }
 
-        public Optional<Trip> Delete(int id)
+    public void delete(int id)
+    {
+        log.InfoFormat("Deleting trip with ID: {0}", id);
+        IDbConnection connection = DBUtils.getConnection(props);
+        using (var comm = connection.CreateCommand())
         {
-            logger.Trace("Deleting Trip with ID: {0}", id);
-            using (SqlConnection connection = dbUtils.GetConnection())
+            comm.CommandText = "DELETE FROM trip WHERE id=@id;";
+            IDbDataParameter paramId = comm.CreateParameter();
+            paramId.ParameterName = "@id";
+            paramId.Value = id;
+            comm.Parameters.Add(paramId);
+            var dataR = comm.ExecuteNonQuery();
+            if (dataR == 0)
             {
-                string query = "DELETE FROM trip WHERE id=@id;";
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@id", id);
-                    connection.Open();
-                    int rowsAffected = command.ExecuteNonQuery();
-                    logger.Trace("Deleted {0} instances", rowsAffected);
-                }
+                log.InfoFormat("Trip with ID {0} NOT deleted", id);
+                throw new Exception("No deleted trip!");
             }
-            return Optional.Empty<Trip>();
-        }
-
-        public Optional<Trip> Update(int id, Trip entity)
-        {
-            logger.Trace("Updating Trip with ID: {0}", id);
-            using (SqlConnection connection = dbUtils.GetConnection())
-            {
-                string query = "UPDATE trip SET touristID=@touristID WHERE id=@id;";
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@touristID", entity.Tourist.Id);
-                    command.Parameters.AddWithValue("@id", id);
-                    connection.Open();
-                    int rowsAffected = command.ExecuteNonQuery();
-                    logger.Trace("Updated {0} instances", rowsAffected);
-                }
-            }
-            return Optional.Empty<Trip>();
         }
     }
+
+    public void update( Trip entity)
+    {
+
+    }
 }
+

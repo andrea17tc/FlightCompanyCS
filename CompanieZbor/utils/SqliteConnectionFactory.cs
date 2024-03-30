@@ -1,23 +1,24 @@
 ﻿using System;
 using System.Data;
-using Mono.Data.Sqlite;
 using System.Collections.Generic;
-namespace ConnectionUtils
+using Mono.Data.Sqlite;
+
+namespace CompanieZbor.utils;
+
+public class SqliteConnectionFactory : ConnectionFactory
 {
-    public class SqliteConnectionFactory : ConnectionFactory
+    public override IDbConnection createConnection(IDictionary<string, string> props)
     {
-        public override IDbConnection createConnection(IDictionary<string, string> props)
-        {
-            //Mono Sqlite Connection
+        //Mono Sqlite Connection
 
-            //String connectionString = "URI=file:/Users/grigo/didactic/MPP/ExempleCurs/2017/database/tasks.db,Version=3";
-            String connectionString = props["ConnectionString"];
-            Console.WriteLine("SQLite ---Se deschide o conexiune la  ... {0}", connectionString);
-            return new SqliteConnection(connectionString);
+        //String connectionString = "C:\\Users\\Andrea\\source\\repos\\MPP\\mpp-proiect-csharp-andrea17tc\\CompanieZbor\\companieZbor.db";
+        String connectionString = "Data Source=C:\\Users\\Andrea\\source\\repos\\MPP\\mpp-proiect-csharp-andrea17tc\\CompanieZbor\\companieZbor.db;Version=3";
+        //String connectionString = props["ConnectionString"];
+        Console.WriteLine("SQLite ---Se deschide o conexiune la  ... {0}", connectionString);
+        return new SqliteConnection(connectionString);
 
-            // Windows SQLite Connection, fisierul .db ar trebuie sa fie in directorul debug/bin
-            //String connectionString = "Data Source=tasks.db;Version=3";
-            //return new SQLiteConnection(connectionString);
-        }
+        // Windows SQLite Connection, fisierul .db ar trebuie sa fie in directorul debug/bin
+        //String connectionString = "Data Source=tasks.db;Version=3";
+        //return new SQLiteConnection(connectionString);
     }
 }

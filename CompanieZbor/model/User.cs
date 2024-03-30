@@ -1,5 +1,4 @@
 ﻿namespace CompanieZbor.model;
-
 public class User : Entity<int>
 {
     private string username;
@@ -17,6 +16,12 @@ public class User : Entity<int>
         get { return username; }
         set { username = value; }
     }
+
+    public string Password
+    {
+        get { return password; }
+        set { password = value; }
+    }
     public override bool Equals(object obj)
     {
         if (obj == null || GetType() != obj.GetType())
@@ -32,5 +37,10 @@ public class User : Entity<int>
     public override string ToString()
     {
         return username + password + '\n';
+    }
+
+    public override int GetHashCode()
+    {
+        throw new NotImplementedException();
     }
 }

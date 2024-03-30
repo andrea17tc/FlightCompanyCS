@@ -1,5 +1,4 @@
 ﻿namespace CompanieZbor.model;
-
 public class Purchase : Entity<int>
 {
     private Flight flight;
@@ -70,5 +69,10 @@ public class Purchase : Entity<int>
     public override string ToString()
     {
         return flight.ToString() + user.ToString() + tourist.ToString() + clientAddress+ noBookedSeats.ToString() + '\n';
+    }
+
+    public override int GetHashCode()
+    {
+        throw new NotImplementedException();
     }
 }
