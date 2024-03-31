@@ -1,13 +1,13 @@
-﻿using CompanieZbor.model;
+﻿using CompanieZborGUI.model;
 using log4net;
 using log4net.Repository.Hierarchy;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using CompanieZbor.utils;
+using CompanieZborGUI.utils;
 
-namespace CompanieZbor.repository;
+namespace CompanieZborGUI.repository;
 public class FlightRepository : IRepository<int, Flight>
 {
     private static readonly ILog log = LogManager.GetLogger("FlightRepository");
@@ -179,6 +179,30 @@ public class FlightRepository : IRepository<int, Flight>
             }
         }
     }
+
+    public void updateNoSeats(Flight entity)
+    {
+        log.InfoFormat("Updating Flight with ID: {0}", entity.Id);
+        IDbConnection connection = DBUtils.getConnection(props);
+        using (var command = connection.CreateCommand())
+        {
+            command.CommandText = "UPDATE flight SET noTotalSeats=@noTotalSeats WHERE id=@id;";
+            IDbDataParameter noTotalSeats = command.CreateParameter();
+            noTotalSeats.ParameterName = "@noTotalSeats";
+            noTotalSeats.Value = entity.NoTotalSeats;
+            Console.WriteLine(noTotalSeats);
+            command.Parameters.Add(noTotalSeats);
+
+
+            var result = command.ExecuteNonQuery();
+            if (result == 0)
+            {
+                log.InfoFormat("Flight {0} NOT updated", entity);
+                throw new Exception("Flight NOT updated");
+            }
+        }
+    }
+
 
 }
 

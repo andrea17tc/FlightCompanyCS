@@ -22,3 +22,4 @@ C:\Users\Andrea\source\repos\MPP\mpp-proiect-csharp-andrea17tc\CompanieZbor\obj\
 C:\Users\Andrea\source\repos\MPP\mpp-proiect-csharp-andrea17tc\CompanieZbor\obj\Debug\net7.0\CompanieZbor.genruntimeconfig.cache
 C:\Users\Andrea\source\repos\MPP\mpp-proiect-csharp-andrea17tc\CompanieZbor\obj\Debug\net7.0\ref\CompanieZbor.dll
 C:\Users\Andrea\source\repos\MPP\mpp-proiect-csharp-andrea17tc\CompanieZbor\bin\Debug\net7.0\Mono.Data.Sqlite.dll
+C:\Users\Andrea\source\repos\MPP\mpp-proiect-csharp-andrea17tc\CompanieZbor\bin\Debug\net7.0\CompanieZbor.dll.config

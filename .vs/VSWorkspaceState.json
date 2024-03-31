@@ -1,6 +1,11 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\CompanieZbor",
+    "\\CompanieZbor\\model",
+    "\\CompanieZbor\\repository",
+    "\\CompanieZbor\\utils"
   ],
+  "SelectedNode": "\\CompanieZbor\\repository\\UserRepository.cs",
   "PreviewInSolutionExplorer": false
 }
