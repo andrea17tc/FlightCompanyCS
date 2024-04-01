@@ -9,15 +9,13 @@ public class Purchase : Entity<int>
     
     private string clientAddress;
 
-    private int noBookedSeats;
 
-    public Purchase(Flight flight, User user, Tourist tourist, string clientAddress, int noBookedSeats)
+    public Purchase(Flight flight, User user, Tourist tourist, string clientAddress)
     {
         this.flight = flight;
         this.user = user;
         this.tourist = tourist;
         this.clientAddress = clientAddress;
-        this.noBookedSeats = noBookedSeats;
     }
 
     public Flight Flight
@@ -44,12 +42,6 @@ public class Purchase : Entity<int>
         set { clientAddress = value; }
     }
     
-    public int NoBookedSeats
-    {
-        get { return noBookedSeats; }
-        set { noBookedSeats = value; }
-    }
-    
 
     public override bool Equals(object obj)
     {
@@ -62,13 +54,12 @@ public class Purchase : Entity<int>
         return flight == other.flight &&
                user == other.user &&
                tourist == other.tourist &&
-               clientAddress == other.clientAddress &&
-               noBookedSeats == other.noBookedSeats;
+               clientAddress == other.clientAddress;
     }
 
     public override string ToString()
     {
-        return flight.ToString() + user.ToString() + tourist.ToString() + clientAddress+ noBookedSeats.ToString() + '\n';
+        return flight.ToString() + user.ToString() + tourist.ToString() + clientAddress+ '\n';
     }
 
     public override int GetHashCode()

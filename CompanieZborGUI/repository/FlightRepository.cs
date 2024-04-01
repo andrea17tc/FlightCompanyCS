@@ -157,7 +157,6 @@ public class FlightRepository : IRepository<int, Flight>
             IDbDataParameter date = command.CreateParameter();
             date.ParameterName = "@date";
             date.Value = entity.Date.ToString();
-            Console.WriteLine(date.Value);
             command.Parameters.Add(date);
 
             IDbDataParameter airport = command.CreateParameter();
@@ -180,24 +179,28 @@ public class FlightRepository : IRepository<int, Flight>
         }
     }
 
-    public void updateNoSeats(Flight entity)
+    public void updateNoSeats(int id, int noSeats)
     {
-        log.InfoFormat("Updating Flight with ID: {0}", entity.Id);
+        log.InfoFormat("Updating Flight with ID: {0}", id);
         IDbConnection connection = DBUtils.getConnection(props);
         using (var command = connection.CreateCommand())
         {
             command.CommandText = "UPDATE flight SET noTotalSeats=@noTotalSeats WHERE id=@id;";
             IDbDataParameter noTotalSeats = command.CreateParameter();
             noTotalSeats.ParameterName = "@noTotalSeats";
-            noTotalSeats.Value = entity.NoTotalSeats;
-            Console.WriteLine(noTotalSeats);
+            noTotalSeats.Value = noSeats;
             command.Parameters.Add(noTotalSeats);
+
+            IDbDataParameter Pid = command.CreateParameter();
+            Pid.ParameterName = "@id";
+            Pid.Value = id;
+            command.Parameters.Add(Pid);
 
 
             var result = command.ExecuteNonQuery();
             if (result == 0)
             {
-                log.InfoFormat("Flight {0} NOT updated", entity);
+                log.InfoFormat("Flight {0} NOT updated", id);
                 throw new Exception("Flight NOT updated");
             }
         }

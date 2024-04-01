@@ -19,7 +19,6 @@ namespace CompanieZborGUI
             {
                 Form2 form = new Form2(service);
                 form.Show();
-                this.Hide();
             }
             else
             {

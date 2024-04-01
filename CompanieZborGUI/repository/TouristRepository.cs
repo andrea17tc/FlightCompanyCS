@@ -51,6 +51,37 @@ public class TouristRepository : IRepository<int, Tourist>
         return null;
     }
 
+    public Tourist? findByName(string touristName)
+    {
+        log.InfoFormat("Finding Tourist by Name: {0}", touristName);
+        IDbConnection con = DBUtils.getConnection(props);
+
+        using (var comm = con.CreateCommand())
+        {
+            comm.CommandText = "SELECT * FROM tourist WHERE name=@name; ";
+            IDbDataParameter name = comm.CreateParameter();
+            name.ParameterName = "@name";
+            name.Value = touristName;
+            comm.Parameters.Add(name);
+
+            using (var dataR = comm.ExecuteReader())
+            {
+                if (dataR.Read())
+                {
+                    int id = dataR.GetInt32(0);
+                    string n = dataR.GetString(1);
+                    Tourist tourist = new Tourist(n);
+                    tourist.Id = id;
+                    log.InfoFormat("Found Tourist: {0}", tourist);
+                    return tourist;
+
+                }
+            }
+        }
+        log.InfoFormat("Tourist not found with name: {0}", touristName);
+        return null;
+    }
+
     public IEnumerable<Tourist> findAll()
     {
         log.InfoFormat("Finding All Tourists");

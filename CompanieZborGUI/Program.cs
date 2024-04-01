@@ -17,10 +17,12 @@ namespace CompanieZborGUI
             props.Add("ConnectionString", GetConnectionStringByName("companieZbor"));
 
             FlightRepository flightRepository = new FlightRepository(props);
-            PurchaseRepository purchaseRepository= new PurchaseRepository(props);
-            TouristRepository touristRepository= new TouristRepository(props);
-            TripRepository tripRepository = new TripRepository(props, touristRepository,purchaseRepository);
             UserRepository userRepository= new UserRepository(props);
+            TouristRepository touristRepository= new TouristRepository(props);
+            PurchaseRepository purchaseRepository= new PurchaseRepository(props,flightRepository, userRepository,touristRepository);
+            
+            TripRepository tripRepository = new TripRepository(props, touristRepository,purchaseRepository);
+            
 
             Service service = new Service(flightRepository, purchaseRepository, touristRepository, tripRepository, userRepository);
 

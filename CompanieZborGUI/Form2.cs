@@ -28,16 +28,67 @@ namespace CompanieZborGUI
             comboBoxDestination.Text = "Destination";
             comboBoxDestination.DataSource = destinations;
             comboBoxDestination.SelectedIndex = 0;
+            dataGridView1.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+
+            List<Flight> flights = service.findAllAvailableFlights().ToList();
+            dataGridView1.DataSource = flights;
+            dataGridView1.Columns[4].Visible = false;
 
         }
 
         private void buttonSearch_Click(object sender, EventArgs e)
         {
-            DateOnly d = DateOnly.Parse(dateTimePicker1.Value.ToShortDateString());
-            string destination = comboBoxDestination.Text;
+            DateTime d = dateTimePicker1.Value.Date;
+            string destination = comboBoxDestination.Text.Trim();
 
             List<Flight> flights = service.findFlightsByDestinationAndDate(destination, d).ToList();
-            dataGridView1.DataSource= flights;
+            if( flights.Count == 0 )
+            {
+                dataGridView1.Visible = false;
+                labelAllFlights.Visible= false;
+                Label noFlights = new Label();
+                noFlights.Location = new Point(81, 132);
+                noFlights.Text = "No Flights Available For Your Date";
+                noFlights.AutoSize = true;
+                noFlights.Font = new Font("Calibri", 18);
+                noFlights.ForeColor = Color.Red;
+                noFlights.Padding = new Padding(2);
+                this.Controls.Add(noFlights);
+
+            }
+            else
+            {
+                dataGridView1.DataSource= flights;
+                dataGridView1.Columns[4].Visible= false;
+            }
+           
+        }
+
+        private void dataGridView1_RowHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+
+        }
+
+        private void buttonBook_Click(object sender, EventArgs e)
+        {
+            string stringId = dataGridView1.SelectedRows[0].Cells[4].Value.ToString();
+            int id = int.Parse(stringId);
+            if( id == 0 ) 
+            {
+                MessageBox.Show("Select flight first!");
+            }
+            else
+            {  
+                service.setFlightID(id);
+                Form3 form = new Form3(service,this);  
+                form.Show();
+                this.Hide();
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            this.Close();
         }
     }
 }

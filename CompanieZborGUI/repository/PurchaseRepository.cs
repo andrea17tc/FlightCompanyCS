@@ -15,12 +15,6 @@ public class PurchaseRepository : IRepository<int, Purchase>
     private static readonly ILog log = LogManager.GetLogger("Purchase Repository");
     IDictionary<String, string> props;
 
-    public PurchaseRepository(IDictionary<String, string> props)
-    {
-        log.Info("Creating UserRepository ");
-        this.props = props;
-    }
-
     public PurchaseRepository(IDictionary<String, string> props, FlightRepository flightRepository, UserRepository userRepository,
                           TouristRepository touristRepository)
     {
@@ -52,15 +46,14 @@ public class PurchaseRepository : IRepository<int, Purchase>
                     int userID = dataR.GetInt32(2);
                     int touristID = dataR.GetInt32(3);
                     string clientAdress = dataR.GetString(4);
-                    int noBookedSeats = dataR.GetInt32(5);
 
                     Flight f = flightRepository.findOne(flightID);
                     User u = userRepository.findOne(userID);
                     Tourist t = touristRepository.findOne(touristID);
 
-                    Purchase p = new Purchase(f, u, t, clientAdress, noBookedSeats);
+                    Purchase p = new Purchase(f, u, t, clientAdress);
 
-
+                    p.Id = id;
                   
                     log.InfoFormat("Found Purchase: {0}", p);
                     return p;
@@ -69,6 +62,50 @@ public class PurchaseRepository : IRepository<int, Purchase>
             }
         }
         log.InfoFormat("Purchase not found with ID: {0}", id);
+        return null;
+    }
+
+    public Purchase? findByClientAndFlight(int flightID,int touristID)
+    {
+        log.InfoFormat("Finding Purchase by flightID and touristID, {0},{1}", flightID,touristID);
+        IDbConnection con = DBUtils.getConnection(props);
+
+        using (var comm = con.CreateCommand())
+        {
+            comm.CommandText = "SELECT * FROM purchase WHERE flightID=@flightID and touristID=@touristID; ";
+            IDbDataParameter paramFId = comm.CreateParameter();
+            paramFId.ParameterName = "@flightID";
+            paramFId.Value = flightID;
+            comm.Parameters.Add(paramFId);
+
+            IDbDataParameter paramTId = comm.CreateParameter();
+            paramTId.ParameterName = "@touristID";
+            paramTId.Value = touristID;
+            comm.Parameters.Add(paramTId);
+
+
+            using (var dataR = comm.ExecuteReader())
+            {
+                if (dataR.Read())
+                {
+                    int id = dataR.GetInt32(0);
+                    int userID = dataR.GetInt32(2);
+                    string clientAdress = dataR.GetString(4);
+
+                    Flight f = flightRepository.findOne(flightID);
+                    User u = userRepository.findOne(userID);
+                    Tourist t = touristRepository.findOne(touristID);
+
+                    Purchase p = new Purchase(f, u, t, clientAdress);
+
+                    p.Id = id;
+                    log.InfoFormat("Found Purchase: {0}", p);
+                    return p;
+
+                }
+            }
+        }
+        log.InfoFormat("Purchase not found with IDs");
         return null;
     }
 
@@ -89,13 +126,12 @@ public class PurchaseRepository : IRepository<int, Purchase>
                     int userID = dataR.GetInt32(2);
                     int touristID = dataR.GetInt32(3);
                     string clientAdress = dataR.GetString(4);
-                    int noBookedSeats = dataR.GetInt32(5);
 
                     Flight f = flightRepository.findOne(flightID);
                     User u = userRepository.findOne(userID);
                     Tourist t = touristRepository.findOne(touristID);
 
-                    Purchase p = new Purchase(f, u, t, clientAdress, noBookedSeats);
+                    Purchase p = new Purchase(f, u, t, clientAdress);
                     purchases.Add(p);
 
                 }
@@ -112,7 +148,7 @@ public class PurchaseRepository : IRepository<int, Purchase>
 
         using (var command = connection.CreateCommand())
         {
-            command.CommandText = "INSERT INTO purchase (flightID, userID, touristID, clientAdress, noBookedSeats) VALUES (@flightID, @userID, @touristID, @noBookedSeats);";
+            command.CommandText = "INSERT INTO purchase (flightID, userID, touristID, clientAdress) VALUES (@flightID, @userID, @touristID, @clientAdress);";
 
             var flightID = command.CreateParameter();
             flightID.ParameterName = "@flightID";
@@ -134,10 +170,6 @@ public class PurchaseRepository : IRepository<int, Purchase>
             clientAdress.Value = entity.ClientAddress;
             command.Parameters.Add(clientAdress);
 
-            var noSeats = command.CreateParameter();
-            noSeats.ParameterName = "@noBookedSeats";
-            noSeats.Value = entity.NoBookedSeats;
-            command.Parameters.Add(noSeats);
 
             var result = command.ExecuteNonQuery();
             if (result == 0)
