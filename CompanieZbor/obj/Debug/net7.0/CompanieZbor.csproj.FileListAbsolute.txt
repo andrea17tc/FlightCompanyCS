@@ -15,7 +15,6 @@ C:\Users\Andrea\source\repos\MPP\mpp-proiect-csharp-andrea17tc\CompanieZbor\bin\
 C:\Users\Andrea\source\repos\MPP\mpp-proiect-csharp-andrea17tc\CompanieZbor\bin\Debug\net7.0\System.Security.Cryptography.ProtectedData.dll
 C:\Users\Andrea\source\repos\MPP\mpp-proiect-csharp-andrea17tc\CompanieZbor\bin\Debug\net7.0\System.Security.Permissions.dll
 C:\Users\Andrea\source\repos\MPP\mpp-proiect-csharp-andrea17tc\CompanieZbor\bin\Debug\net7.0\runtimes\win\lib\netstandard2.0\System.Security.Cryptography.ProtectedData.dll
-C:\Users\Andrea\source\repos\MPP\mpp-proiect-csharp-andrea17tc\CompanieZbor\obj\Debug\net7.0\CompanieZbor.csproj.CopyComplete
 C:\Users\Andrea\source\repos\MPP\mpp-proiect-csharp-andrea17tc\CompanieZbor\obj\Debug\net7.0\CompanieZbor.dll
 C:\Users\Andrea\source\repos\MPP\mpp-proiect-csharp-andrea17tc\CompanieZbor\obj\Debug\net7.0\refint\CompanieZbor.dll
 C:\Users\Andrea\source\repos\MPP\mpp-proiect-csharp-andrea17tc\CompanieZbor\obj\Debug\net7.0\CompanieZbor.pdb
@@ -23,3 +22,5 @@ C:\Users\Andrea\source\repos\MPP\mpp-proiect-csharp-andrea17tc\CompanieZbor\obj\
 C:\Users\Andrea\source\repos\MPP\mpp-proiect-csharp-andrea17tc\CompanieZbor\obj\Debug\net7.0\ref\CompanieZbor.dll
 C:\Users\Andrea\source\repos\MPP\mpp-proiect-csharp-andrea17tc\CompanieZbor\bin\Debug\net7.0\Mono.Data.Sqlite.dll
 C:\Users\Andrea\source\repos\MPP\mpp-proiect-csharp-andrea17tc\CompanieZbor\bin\Debug\net7.0\CompanieZbor.dll.config
+C:\Users\Andrea\source\repos\MPP\mpp-proiect-csharp-andrea17tc\CompanieZbor\obj\Debug\net7.0\CompanieZbor.sourcelink.json
+C:\Users\Andrea\source\repos\MPP\mpp-proiect-csharp-andrea17tc\CompanieZbor\obj\Debug\net7.0\Companie.1C2D36C8.Up2Date

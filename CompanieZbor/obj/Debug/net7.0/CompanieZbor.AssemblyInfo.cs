@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("CompanieZbor")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a99e0fa8ec443e6970692067cf74ec9ea0d32c39")]
 [assembly: System.Reflection.AssemblyProductAttribute("CompanieZbor")]
 [assembly: System.Reflection.AssemblyTitleAttribute("CompanieZbor")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -5,12 +5,13 @@ using System.Text;
 using System.Threading.Tasks;
 using CompanieZborGUI.repository;
 using CompanieZborGUI.model;
+using CompanieZborGUI.utils;
 using System.Linq;
 using System.ServiceProcess;
 
-namespace CompanieZborGUI.service
+namespace CompanieZborGUI.service 
 {
-    public class Service
+    public class Service: IObservable
     {
         FlightRepository flightRepository;
         PurchaseRepository purchaseRepository;
@@ -20,6 +21,8 @@ namespace CompanieZborGUI.service
         int userID;
         int flightID=0;
         int touristID=0;
+
+        List<IObserver> observers = new List<IObserver>();
 
         public Service(FlightRepository flightRepository, PurchaseRepository purchaseRepository,
         TouristRepository touristRepository, TripRepository tripRepository, UserRepository userRepository)
@@ -159,6 +162,7 @@ namespace CompanieZborGUI.service
                 Flight f = flightRepository.findOne(flightID);
                 int nr = f.NoTotalSeats - noSeats;
                 flightRepository.updateNoSeats(flightID, nr);
+                notifyObservers();
             }
             catch(Exception e)
             {
@@ -167,5 +171,19 @@ namespace CompanieZborGUI.service
             
         }
 
+        public void addObserver(IObserver obs)
+        {
+            observers.Add(obs);
+        }
+
+        public void removeObserver(IObserver obs)
+        {
+            observers.Remove(obs);
+        }
+
+        public void notifyObservers()
+        {
+            observers.ForEach(obs => obs.update());
+        }
     }
 }

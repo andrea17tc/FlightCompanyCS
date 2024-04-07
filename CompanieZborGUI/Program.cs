@@ -1,7 +1,7 @@
 using System.Configuration;
 using CompanieZborGUI.repository;
 using CompanieZborGUI.service;
-
+[assembly: log4net.Config.XmlConfigurator(Watch = true)]
 namespace CompanieZborGUI
 {
     internal static class Program
@@ -15,6 +15,7 @@ namespace CompanieZborGUI
 
             IDictionary<String, string> props = new SortedList<String, String>();
             props.Add("ConnectionString", GetConnectionStringByName("companieZbor"));
+            Console.WriteLine("1");
 
             FlightRepository flightRepository = new FlightRepository(props);
             UserRepository userRepository= new UserRepository(props);

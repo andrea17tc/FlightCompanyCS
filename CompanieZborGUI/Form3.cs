@@ -126,6 +126,7 @@ namespace CompanieZborGUI
         {
             this.Close();
             form.Show();
+     
         }
     }
 }

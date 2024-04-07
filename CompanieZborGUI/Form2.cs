@@ -9,15 +9,17 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using CompanieZborGUI.service;
 using CompanieZborGUI.model;
+using CompanieZborGUI.utils;
 
 namespace CompanieZborGUI
 {
-    public partial class Form2 : Form
+    public partial class Form2 : Form, IObserver
     {
         Service service;
         public Form2(Service service)
         {
             this.service = service;
+            service.addObserver(this);
             InitializeComponent();
             Form2_Load();
         }
@@ -89,6 +91,11 @@ namespace CompanieZborGUI
         private void button1_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+        public void update()
+        {
+            Form2_Load();
         }
     }
 }
