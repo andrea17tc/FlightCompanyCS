@@ -8,6 +8,6 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = CompanieZbor
-build_property.ProjectDir = C:\Users\Andrea\source\repos\MPP\mpp-proiect-csharp-andrea17tc\CompanieZbor\
+build_property.ProjectDir = C:\Users\Andrea\Source\Repos\FlightCompanyCS\CompanieZbor\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
